@@ -133,5 +133,5 @@ android {
 dependencies {
     implementation "androidx.appcompat:appcompat:$androidxCoreVersion"
     implementation 'com.github.promeg:tinypinyin:1.0.0'
-    implementation "com.github.gzuliyujiang:Scaffold:2019.10.27"
+    implementation "com.github.gzuliyujiang:Scaffold:2019.10.27.0205"
 }

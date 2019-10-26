@@ -19,10 +19,14 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.collection.ArrayMap;
+
 import com.blankj.utilcode.util.ToastUtils;
 import com.github.gzuliyujiang.bleprinter.R;
 import com.github.gzuliyujiang.bleprinter.utils.BluetoothUtils;
 import com.github.gzuliyujiang.bleprinter.utils.PrintUtil;
+import com.github.gzuliyujiang.scaffold.browser.CustomParams;
+import com.github.gzuliyujiang.toolkit.ActivityResult;
 
 import java.util.List;
 
@@ -105,14 +109,21 @@ public class PrinterSettingActivity extends BasePrintActivity implements View.On
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.btn_js_bridge:
-                JsBridgeActivity.start(this, "http://qqtheme.cn");
+                CustomParams customParams = CustomParams.create("file:///android_asset/test.html")
+                        .setShowTitleBar(true)
+                        .setJsBridge(new ArrayMap<String, Object>())
+                        .setLoadCallback(null);
+                JsBridgeActivity.start(this, customParams);
                 break;
             case R.id.btn_goto_setting:
-                try {
-                    startActivity(new Intent(Settings.ACTION_BLUETOOTH_SETTINGS));
-                } catch (Exception e) {
-                    ToastUtils.showShort("无法打开蓝牙设置");
-                }
+                Intent intent = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                ActivityResult.start(getSupportFragmentManager(), intent, new ActivityResult.Callback() {
+                    @Override
+                    public void onActivityResult(int i, Intent intent) {
+
+                    }
+                });
                 break;
             case R.id.btn_test_conntect:
                 connectDevice(TASK_TYPE_CONNECT);
