@@ -133,5 +133,7 @@ android {
 dependencies {
     implementation "androidx.appcompat:appcompat:$androidxCoreVersion"
     implementation 'com.github.promeg:tinypinyin:1.0.0'
-    implementation "com.github.gzuliyujiang:Scaffold:2019.10.27.0205"
+    implementation 'com.google.code.gson:gson:2.8.6'
+    implementation 'com.github.a-voyager:BluetoothHelper:f71d40a98b'
+    implementation "com.github.gzuliyujiang:Scaffold:2019.11.03"
 }

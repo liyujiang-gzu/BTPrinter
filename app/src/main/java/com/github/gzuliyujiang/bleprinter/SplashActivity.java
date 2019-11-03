@@ -1,4 +1,4 @@
-package com.github.gzuliyujiang.bleprinter.ui;
+package com.github.gzuliyujiang.bleprinter;
 
 import com.github.gzuliyujiang.scaffold.activity.AbsSplashActivity;
 
@@ -13,7 +13,7 @@ public class SplashActivity extends AbsSplashActivity {
 
     @Override
     protected boolean goToNextActivity(List<String> deniedPermissions) {
-        PrinterSettingActivity.start(activity);
+        MainActivity.start(activity);
         return true;
     }
 

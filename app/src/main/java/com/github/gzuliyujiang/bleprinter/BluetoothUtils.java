@@ -1,17 +1,19 @@
-package com.github.gzuliyujiang.bleprinter.utils;
+package com.github.gzuliyujiang.bleprinter;
 
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.provider.Settings;
 
-import java.io.IOException;
+import androidx.fragment.app.FragmentActivity;
+
+import com.github.gzuliyujiang.toolkit.ActivityResult;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 /**
  * 蓝牙工具类
@@ -23,12 +25,49 @@ public class BluetoothUtils {
     /**
      * 蓝牙是否打开
      */
-    public static boolean isBluetoothOn() {
+    public static boolean isBluetoothEnabled() {
         BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
         if (defaultAdapter != null) {
             return defaultAdapter.isEnabled();
         }
         return false;
+    }
+
+    public static void enableBluetooth() {
+        BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (defaultAdapter == null) {
+            return;
+        }
+        if (!defaultAdapter.isEnabled()) {
+            defaultAdapter.enable();
+        }
+    }
+
+    public static void disableBluetooth() {
+        BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (defaultAdapter == null) {
+            return;
+        }
+        if (defaultAdapter.isEnabled()) {
+            defaultAdapter.disable();
+        }
+    }
+
+    /**
+     * 弹出系统对话框，请求打开蓝牙
+     */
+    public static void requestEnableBluetooth(FragmentActivity activity, ActivityResult.Callback callback) {
+        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+        ActivityResult.start(activity.getSupportFragmentManager(), intent, callback);
+    }
+
+    /**
+     * 打开蓝牙设置，进行配对
+     */
+    public static void startBluetoothSettings(Activity activity) {
+        Intent intent = new Intent(Settings.ACTION_BLUETOOTH_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        activity.startActivity(intent);
     }
 
     /**
@@ -62,32 +101,6 @@ public class BluetoothUtils {
             }
         }
         return printerDevices;
-    }
-
-    /**
-     * 弹出系统对话框，请求打开蓝牙
-     */
-    public static void openBluetooth(Activity activity) {
-        Intent intent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        activity.startActivityForResult(intent, 666);
-    }
-
-    public static BluetoothSocket connectDevice(BluetoothDevice device) {
-        BluetoothSocket socket = null;
-        try {
-            socket = device.createRfcommSocketToServiceRecord(
-                    UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-            socket.connect();
-            return socket;
-        } catch (IOException e) {
-            try {
-                if (socket != null) {
-                    socket.close();
-                }
-            } catch (IOException ignore) {
-            }
-        }
-        return null;
     }
 
 }
