@@ -9,13 +9,10 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.github.gzuliyujiang.logger.Logger;
 import com.github.gzuliyujiang.scaffold.browser.BrowserKit;
 import com.github.gzuliyujiang.scaffold.dialog.AlertDialog;
 import com.github.gzuliyujiang.scaffold.dialog.ProgressDialog;
 import com.google.gson.Gson;
-import com.sdwfqin.cbt.CbtManager;
-import com.sdwfqin.cbt.callback.ScanCallback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -144,56 +141,6 @@ public class BluetoothJsBridge {
                 BrowserKit.evaluateJavascript(activity.getWebView(), callbackName + "(" + json + ")");
             }
         });
-    }
-
-    @JavascriptInterface
-    public void scanBluetooth(final String callbackStart, final String callbackFound, final String callbackStop) {
-        if (!BluetoothUtils.isBluetoothEnabled()) {
-            BluetoothUtils.enableBluetooth();
-        }
-        CbtManager.getInstance()
-                .scan(new ScanCallback() {
-                    @Override
-                    public void onScanStart(boolean isOn) {
-                        Logger.debug("start scan");
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                BrowserKit.evaluateJavascript(activity.getWebView(), callbackStart + "()");
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onScanStop(List<BluetoothDevice> devices) {
-                        Logger.debug("stop scan: " + devices);
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                BrowserKit.evaluateJavascript(activity.getWebView(), callbackStop + "()");
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onFindDevice(final BluetoothDevice device) {
-                        Logger.debug("scan: " + device);
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                BluetoothEntity entity = new BluetoothEntity();
-                                String name = device.getName();
-                                if (name == null) {
-                                    name = "";
-                                }
-                                entity.setName(name);
-                                entity.setAddress(device.getAddress());
-                                final String json = new Gson().toJson(entity);
-                                BrowserKit.evaluateJavascript(activity.getWebView(), callbackFound + "(" + json + ")");
-                            }
-                        });
-                    }
-                });
     }
 
     @JavascriptInterface

@@ -26,8 +26,6 @@
     <br/>
     <button onclick="getBondedDevice()">已配对蓝牙设备</button>
     <br/>
-    <button onclick="scanBluetooth()">扫描蓝牙设备</button>
-    <br/>
     <button onclick="printTest('04:50:DA:16:13:2F')">打印测试</button>
     <br/>
 </div>
@@ -59,24 +57,6 @@
 
         function getBondedDeviceCallback(responseData) {
             Bluetooth.showAlert(JSON.stringify(responseData));
-        }
-
-        function scanBluetooth(){
-            Bluetooth.scanBluetooth('scanStartCallback','scanFoundCallback','scanStopCallback');
-        }
-
-        function scanStartCallback() {
-            Bluetooth.showToast('扫描开始');
-            Bluetooth.showProgress('请稍候');
-        }
-
-        function scanFoundCallback(responseData) {
-            Bluetooth.changeProgressText(JSON.stringify(responseData));
-        }
-
-        function scanStopCallback() {
-           Bluetooth.closeProgress();
-           Bluetooth.showToast('扫描结束');
         }
 
         function printTest(address){
