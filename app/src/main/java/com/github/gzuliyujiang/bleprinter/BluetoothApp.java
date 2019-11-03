@@ -4,6 +4,7 @@ import android.app.Application;
 
 import com.github.gzuliyujiang.logger.Logger;
 import com.github.gzuliyujiang.scaffold.ScaffoldApp;
+import com.sdwfqin.cbt.CbtManager;
 
 /**
  * Created by liyujiang on 2019/11/03 23:37
@@ -17,6 +18,7 @@ public class BluetoothApp extends Application {
         super.onCreate();
         Logger.ENABLE = BuildConfig.DEBUG;
         ScaffoldApp.initInApplication(this);
+        CbtManager.getInstance().init(this).enableLog(Logger.ENABLE);
     }
 
 }

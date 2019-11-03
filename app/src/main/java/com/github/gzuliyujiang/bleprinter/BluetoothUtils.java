@@ -53,6 +53,14 @@ public class BluetoothUtils {
         }
     }
 
+    public static BluetoothDevice getBluetoothDevice(String address) {
+        BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (defaultAdapter == null) {
+            return null;
+        }
+        return defaultAdapter.getRemoteDevice(address);
+    }
+
     /**
      * 弹出系统对话框，请求打开蓝牙
      */

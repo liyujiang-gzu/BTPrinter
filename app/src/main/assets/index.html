@@ -28,7 +28,7 @@
     <br/>
     <button onclick="scanBluetooth()">扫描蓝牙设备</button>
     <br/>
-    <button onclick="printTest()">打印测试</button>
+    <button onclick="printTest('04:50:DA:16:13:2F')">打印测试</button>
     <br/>
 </div>
 </body>
@@ -79,19 +79,8 @@
            Bluetooth.showToast('扫描结束');
         }
 
-        function printTest(){
-            Bluetooth.showProgress('请稍候');
-            Bluetooth.printTest('04:50:DA:16:13:2F','printSuccessCallback','printErrorCallback');
-        }
-
-        function printSuccessCallback() {
-            Bluetooth.closeProgress();
-            Bluetooth.showToast('打印成功');
-        }
-
-        function printErrorCallback() {
-            Bluetooth.closeProgress();
-            Bluetooth.showToast('打印失败');
+        function printTest(address){
+            Bluetooth.printTest(address);
         }
 
 </script>

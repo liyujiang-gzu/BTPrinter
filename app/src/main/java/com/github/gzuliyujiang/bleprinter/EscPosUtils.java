@@ -43,8 +43,8 @@ public class EscPosUtils {
         return outputStream;
     }
 
-    public static void setOutputStream(OutputStream outputStream) {
-        outputStream = outputStream;
+    public static void setOutputStream(OutputStream os) {
+        outputStream = os;
     }
 
 
@@ -54,6 +54,9 @@ public class EscPosUtils {
      * @param text 要打印的文字
      */
     public static void printText(String text) {
+        if (outputStream == null) {
+            return;
+        }
         try {
             byte[] data = text.getBytes("gbk");
             outputStream.write(data, 0, data.length);
@@ -69,9 +72,23 @@ public class EscPosUtils {
      * @param command 格式指令
      */
     public static void selectCommand(byte[] command) {
+        if (outputStream == null) {
+            return;
+        }
         try {
             outputStream.write(command);
             outputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void close() {
+        if (outputStream == null) {
+            return;
+        }
+        try {
+            outputStream.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
