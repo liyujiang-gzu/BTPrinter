@@ -16,6 +16,7 @@ import com.github.gzuliyujiang.scaffold.dialog.ProgressDialog;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 import top.wuhaojie.bthelper.BtHelperClient;
@@ -154,8 +155,8 @@ public class BluetoothJsBridge {
 
     @JavascriptInterface
     public void scanBluetooth(final String callbackStart, final String callbackFound, final String callbackStop) {
-        if (!isBluetoothEnabled()) {
-            enableBluetooth();
+        if (!BluetoothUtils.isBluetoothEnabled()) {
+            BluetoothUtils.enableBluetooth();
         }
         activity.runOnUiThread(new Runnable() {
             @Override
@@ -217,84 +218,93 @@ public class BluetoothJsBridge {
         });
     }
 
-    private int printErrorCount = 0;
-
     @JavascriptInterface
     public void printTest(final String address, final String callbackSuccess, final String callbackError) {
-        if (!isBluetoothEnabled()) {
-            enableBluetooth();
+        if (!BluetoothUtils.isBluetoothEnabled()) {
+            BluetoothUtils.enableBluetooth();
         }
-        printErrorCount = 0;
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                sendData(address, EscPosUtils.RESET);
-                sendData(address, EscPosUtils.LINE_SPACING_DEFAULT);
-                sendData(address, EscPosUtils.ALIGN_CENTER);
-                sendData(address, "饭店餐馆名称\n\n");
-                sendData(address, EscPosUtils.DOUBLE_HEIGHT_WIDTH);
-                sendData(address, "桌号：1号桌\n\n");
-                sendData(address, EscPosUtils.NORMAL);
-                sendData(address, EscPosUtils.ALIGN_LEFT);
-                sendData(address, EscPosUtils.format2Column("订单编号", "201507161515\n"));
-                sendData(address, EscPosUtils.format2Column("点菜时间", "2016-02-16 10:46\n"));
-                sendData(address, EscPosUtils.format2Column("上菜时间", "2016-02-16 11:46\n"));
-                sendData(address, EscPosUtils.format2Column("人数：2人", "收银员：张三\n"));
-                sendData(address, "--------------------------------\n");
-                sendData(address, EscPosUtils.BOLD);
-                sendData(address, EscPosUtils.format3Column("项目", "数量", "金额\n"));
-                sendData(address, "--------------------------------\n");
-                sendData(address, EscPosUtils.BOLD_CANCEL);
-                sendData(address, EscPosUtils.format3Column("面", "1", "0.00\n"));
-                sendData(address, EscPosUtils.format3Column("米饭", "1", "6.00\n"));
-                sendData(address, EscPosUtils.format3Column("铁板烧", "1", "26.00\n"));
-                sendData(address, EscPosUtils.format3Column("一个测试", "1", "226.00\n"));
-                sendData(address, EscPosUtils.format3Column("牛肉面啊啊", "1", "2226.00\n"));
-                sendData(address, EscPosUtils.format3Column("牛肉面啊啊啊牛肉面啊啊啊", "888", "98886.00\n"));
-                sendData(address, "--------------------------------\n");
-                sendData(address, EscPosUtils.format2Column("合计", "53.50\n"));
-                sendData(address, EscPosUtils.format2Column("抹零", "3.50\n"));
-                sendData(address, "--------------------------------\n");
-                sendData(address, EscPosUtils.format2Column("应收", "50.00\n"));
-                sendData(address, "--------------------------------\n");
-                sendData(address, EscPosUtils.ALIGN_LEFT);
-                sendData(address, "备注：不要辣、不要香菜");
-                sendData(address, "\n\n\n\n\n");
-                if (printErrorCount == 0) {
+        LinkedList<Object> data = new LinkedList<>();
+        data.add(EscPosUtils.RESET);
+        data.add(EscPosUtils.LINE_SPACING_DEFAULT);
+        data.add(EscPosUtils.ALIGN_CENTER);
+        data.add("饭店餐馆名称\n\n");
+        data.add(EscPosUtils.DOUBLE_HEIGHT_WIDTH);
+        data.add("桌号：1号桌\n\n");
+        data.add(EscPosUtils.NORMAL);
+        data.add(EscPosUtils.ALIGN_LEFT);
+        data.add(EscPosUtils.format2Column("订单编号", "201507161515\n"));
+        data.add(EscPosUtils.format2Column("点菜时间", "2016-02-16 10:46\n"));
+        data.add(EscPosUtils.format2Column("上菜时间", "2016-02-16 11:46\n"));
+        data.add(EscPosUtils.format2Column("人数：2人", "收银员：张三\n"));
+        data.add("--------------------------------\n");
+        data.add(EscPosUtils.BOLD);
+        data.add(EscPosUtils.format3Column("项目", "数量", "金额\n"));
+        data.add("--------------------------------\n");
+        data.add(EscPosUtils.BOLD_CANCEL);
+        data.add(EscPosUtils.format3Column("面", "1", "0.00\n"));
+        data.add(EscPosUtils.format3Column("米饭", "1", "6.00\n"));
+        data.add(EscPosUtils.format3Column("铁板烧", "1", "26.00\n"));
+        data.add(EscPosUtils.format3Column("一个测试", "1", "226.00\n"));
+        data.add(EscPosUtils.format3Column("牛肉面啊啊", "1", "2226.00\n"));
+        data.add(EscPosUtils.format3Column("牛肉面啊啊啊牛肉面啊啊啊", "888", "98886.00\n"));
+        data.add("--------------------------------\n");
+        data.add(EscPosUtils.format2Column("合计", "53.50\n"));
+        data.add(EscPosUtils.format2Column("抹零", "3.50\n"));
+        data.add("--------------------------------\n");
+        data.add(EscPosUtils.format2Column("应收", "50.00\n"));
+        data.add("--------------------------------\n");
+        data.add(EscPosUtils.ALIGN_LEFT);
+        data.add("备注：不要辣、不要香菜");
+        data.add("\n\n\n\n\n");
+        sendData(address, data, callbackSuccess, callbackError);
+    }
+
+    private void sendData(final String address, final LinkedList<Object> data, final String callbackSuccess, final String callbackError) {
+        if (data.isEmpty()) {
+            activity.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
                     BrowserKit.evaluateJavascript(activity.getWebView(), callbackSuccess + "()");
-                } else {
-                    BrowserKit.evaluateJavascript(activity.getWebView(), callbackError + "()");
                 }
-            }
-        });
-    }
-
-    private void sendData(final String address, final String data) {
-        sendMessage(address, new MessageItem(data));
-    }
-
-    private void sendData(final String address, final byte[] data) {
-        char[] chars = EscPosUtils.toChars(data);
-        sendMessage(address, new MessageItem(chars));
-    }
-
-    private void sendMessage(String address, MessageItem item) {
+            });
+            return;
+        }
+        Object d = data.getFirst();
+        MessageItem item;
+        if (d instanceof String) {
+            item = new MessageItem(d.toString());
+        } else {
+            char[] chars = EscPosUtils.toChars((byte[]) d);
+            item = new MessageItem(chars);
+        }
         btHelperClient.sendMessage(address, item, new OnSendMessageListener() {
             @Override
             public void onSuccess(int status, String response) {
                 Logger.debug("发送数据成功：status=" + status);
+                data.removeFirst();
+                sendData(address, data, callbackSuccess, callbackError);
             }
 
             @Override
             public void onConnectionLost(Exception e) {
                 Logger.debug("发送数据失败：" + e);
-                printErrorCount++;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        BrowserKit.evaluateJavascript(activity.getWebView(), callbackError + "()");
+                    }
+                });
             }
 
             @Override
             public void onError(Exception e) {
                 Logger.debug("发送数据失败：" + e);
-                printErrorCount++;
+                activity.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        BrowserKit.evaluateJavascript(activity.getWebView(), callbackError + "()");
+                    }
+                });
             }
         });
     }
