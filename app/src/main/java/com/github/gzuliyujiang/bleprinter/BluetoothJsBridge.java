@@ -144,8 +144,8 @@ public class BluetoothJsBridge {
     }
 
     @JavascriptInterface
-    public void printTest(final String address) {
-        new PrinterTask(activity).execute(address);
+    public void printPaper(final String address) {
+        new PrintPaperTask(activity).execute(address);
     }
 
 }

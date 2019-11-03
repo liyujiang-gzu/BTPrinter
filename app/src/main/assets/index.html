@@ -16,17 +16,17 @@
 </head>
 <body>
 <div style="padding-top:25px;">
-    <button onclick="checkBluetoothEnable()">检查蓝牙是否开启</button>
+    <button onclick="checkBluetoothEnable()">检查蓝牙是否开启:Bluetooth.isBluetoothEnabled()</button>
     <br/>
-    <button onclick="enableBluetooth()">开启蓝牙</button>
+    <button onclick="enableBluetooth()">开启蓝牙:Bluetooth.enableBluetooth()</button>
     <br/>
-    <button onclick="disableBluetooth()">关闭蓝牙</button>
+    <button onclick="disableBluetooth()">关闭蓝牙:Bluetooth.disableBluetooth()</button>
     <br/>
-    <button onclick="bluetoothSettings()">打开蓝牙设置</button>
+    <button onclick="bluetoothSettings()">打开蓝牙设置(配对):Bluetooth.openBluetoothSettings()</button>
     <br/>
-    <button onclick="getBondedDevice()">已配对蓝牙设备</button>
+    <button onclick="getBondedDevice()">获取已配对蓝牙设备:Bluetooth.getBondedDevice('callback');</button>
     <br/>
-    <button onclick="printTest('04:50:DA:16:13:2F')">打印测试</button>
+    <button onclick="printTest('04:50:DA:16:13:2F')">打印测试:Bluetooth.printPaper(address)</button>
     <br/>
 </div>
 </body>
@@ -60,7 +60,7 @@
         }
 
         function printTest(address){
-            Bluetooth.printTest(address);
+            Bluetooth.printPaper(address);
         }
 
 </script>
