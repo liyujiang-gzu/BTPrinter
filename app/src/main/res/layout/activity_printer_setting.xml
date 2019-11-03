@@ -8,7 +8,7 @@
         android:id="@+id/edt_js_bridge_url"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="file:///android_asset/test.html" />
+        android:text="file:///android_asset/index.html" />
 
     <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btn_js_bridge_go"
