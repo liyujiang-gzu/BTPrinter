@@ -83,7 +83,7 @@ public class EscPosUtils {
         }
     }
 
-    public static void close() {
+    public static void tryClose() {
         if (outputStream == null) {
             return;
         }

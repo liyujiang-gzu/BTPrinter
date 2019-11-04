@@ -24,9 +24,11 @@
     <br/>
     <button onclick="bluetoothSettings()">打开蓝牙设置(配对):Bluetooth.openBluetoothSettings()</button>
     <br/>
-    <button onclick="getBondedDevice()">获取已配对蓝牙设备:Bluetooth.getBondedDevice('callback');</button>
+    <button onclick="getPairedDevice()">获取已配对蓝牙设备:Bluetooth.getPairedDevice('callback');</button>
     <br/>
-    <button onclick="printTest('04:50:DA:16:13:2F')">打印测试:Bluetooth.printPaper(address)</button>
+    <button onclick="showPairedDevice()">尝试连接已配对蓝牙设备并打印:Bluetooth.showPairedDevice();</button>
+    <br/>
+    <button onclick="printTest('E4:F8:9C:66:5A:B6')">打印测试:Bluetooth.printPaper(address)</button>
     <br/>
 </div>
 </body>
@@ -51,12 +53,16 @@
             Bluetooth.openBluetoothSettings();
         }
 
-        function getBondedDevice(){
-            Bluetooth.getBondedDevice('getBondedDeviceCallback');
+        function getPairedDevice(){
+            Bluetooth.getPairedDevice('getPairedDeviceCallback');
         }
 
-        function getBondedDeviceCallback(responseData) {
+        function getPairedDeviceCallback(responseData) {
             Bluetooth.showAlert(JSON.stringify(responseData));
+        }
+
+        function showPairedDevice(){
+            Bluetooth.showPairedDevice();
         }
 
         function printTest(address){

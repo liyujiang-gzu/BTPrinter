@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 /**
- * 蓝牙工具类
+ * 蓝牙工具类，参阅 https://github.com/4dcity/BluetoothPrinterDemo
  *
  * @author liyujiang
  */
@@ -81,7 +81,7 @@ public class BluetoothUtils {
     /**
      * 获取所有已配对的设备
      */
-    public static List<BluetoothDevice> getBondedDevices() {
+    public static List<BluetoothDevice> getPairedDevice() {
         List<BluetoothDevice> deviceList = new ArrayList<>();
         BluetoothAdapter defaultAdapter = BluetoothAdapter.getDefaultAdapter();
         if (defaultAdapter == null) {
@@ -96,17 +96,23 @@ public class BluetoothUtils {
     }
 
     /**
-     * 获取所有已配对的打印机
+     * 获取所有已配对的打印类设备
      */
-    public static List<BluetoothDevice> getBondedPrinters() {
-        List<BluetoothDevice> bondedDevices = getBondedDevices();
+    public static List<BluetoothDevice> getPairedPrinter() {
+        return getSpecificDevice(BluetoothClass.Device.Major.IMAGING);
+    }
+
+    /**
+     * 从已配对设配中，删选出某一特定类型的设备展示
+     */
+    public static List<BluetoothDevice> getSpecificDevice(int deviceClass) {
+        List<BluetoothDevice> devices = getPairedDevice();
         List<BluetoothDevice> printerDevices = new ArrayList<>();
-        for (BluetoothDevice device : bondedDevices) {
-            int majorDeviceClass = device.getBluetoothClass().getMajorDeviceClass();
+        for (BluetoothDevice device : devices) {
+            BluetoothClass klass = device.getBluetoothClass();
             // 关于蓝牙设备分类参考 http://stackoverflow.com/q/23273355/4242112
-            if (majorDeviceClass == BluetoothClass.Device.Major.IMAGING) {
+            if (klass.getMajorDeviceClass() == deviceClass)
                 printerDevices.add(device);
-            }
         }
         return printerDevices;
     }

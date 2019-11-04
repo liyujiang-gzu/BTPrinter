@@ -37,8 +37,8 @@ public class PrintPaperTask extends AsyncTask<String, Integer, Void> {
         if (!BluetoothUtils.isBluetoothEnabled()) {
             BluetoothUtils.enableBluetooth();
         }
-        EscPosUtils.close();
-        BluetoothSocket mSocket = null;
+        EscPosUtils.tryClose();
+        BluetoothSocket socket = null;
         try {
             BluetoothDevice device = BluetoothUtils.getBluetoothDevice(params[0]);
             if (device == null) {
@@ -46,23 +46,24 @@ public class PrintPaperTask extends AsyncTask<String, Integer, Void> {
                 return null;
             }
             try {
-                mSocket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
-                mSocket.connect();
-            } catch (IOException ignore) {
+                socket = device.createRfcommSocketToServiceRecord(UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
+                socket.connect();
+            } catch (IOException e) {
+                Logger.debug(e);
                 try {
                     // See https://blog.csdn.net/vic_torsun/article/details/79650865
                     @SuppressWarnings({"RedundantArrayCreation", "SpellCheckingInspection", "JavaReflectionMemberAccess"})
                     Method m = device.getClass().getMethod("createRfcommSocket", new Class[]{int.class});
-                    mSocket = (BluetoothSocket) m.invoke(device, 1);
-                    mSocket.connect();
-                } catch (Exception e) {
-                    Logger.debug(e);
+                    socket = (BluetoothSocket) m.invoke(device, 1);
+                    socket.connect();
+                } catch (Exception e1) {
+                    Logger.debug(e1);
                 }
             }
-            if (mSocket != null && mSocket.isConnected()) {
-                EscPosUtils.setOutputStream(mSocket.getOutputStream());
+            if (socket != null && socket.isConnected()) {
+                EscPosUtils.setOutputStream(socket.getOutputStream());
                 EscPosUtils.printTest();
-                EscPosUtils.close();
+                EscPosUtils.tryClose();
                 publishProgress(0);
             } else {
                 publishProgress(-2);
@@ -72,8 +73,8 @@ public class PrintPaperTask extends AsyncTask<String, Integer, Void> {
             publishProgress(-1);
         } finally {
             try {
-                if (mSocket != null) {
-                    mSocket.close();
+                if (socket != null) {
+                    socket.close();
                 }
             } catch (IOException ignore) {
             }

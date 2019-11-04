@@ -15,9 +15,7 @@ buildscript {
 allprojects {
     repositories {
         //仓库源是从上往下寻找的，优先从阿里云镜像仓库获取
-        maven {
-            url 'file:///home/liyujiang/.m2/repository'
-        }
+        mavenLocal()
         maven {
             url 'https://maven.aliyun.com/repository/public'
         }

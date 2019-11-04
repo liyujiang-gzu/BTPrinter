@@ -1,6 +1,7 @@
 package com.github.gzuliyujiang.bleprinter;
 
 import android.bluetooth.BluetoothDevice;
+import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.widget.Toast;
 
@@ -96,6 +97,37 @@ public class BluetoothJsBridge {
     }
 
     @JavascriptInterface
+    public void showPairedDevice() {
+        activity.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                List<BluetoothDevice> devices = BluetoothUtils.getPairedDevice();
+                final List<String> addressList = new ArrayList<>();
+                for (BluetoothDevice device : devices) {
+                    String address = device.getAddress();
+                    if (address == null) {
+                        address = "";
+                    }
+                    addressList.add(address);
+                }
+                String[] a = new String[addressList.size()];
+                String[] objects = addressList.toArray(a);
+                AlertDialog.showList(activity, "连接蓝牙", objects, new AlertDialog.OnListListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        printPaper(addressList.get(position));
+                    }
+
+                    @Override
+                    public void onCancel() {
+
+                    }
+                });
+            }
+        });
+    }
+
+    @JavascriptInterface
     public boolean isBluetoothEnabled() {
         return BluetoothUtils.isBluetoothEnabled();
     }
@@ -121,8 +153,8 @@ public class BluetoothJsBridge {
     }
 
     @JavascriptInterface
-    public void getBondedDevice(final String callbackName) {
-        List<BluetoothDevice> devices = BluetoothUtils.getBondedDevices();
+    public void getPairedDevice(final String callbackName) {
+        List<BluetoothDevice> devices = BluetoothUtils.getPairedDevice();
         List<BluetoothEntity> entities = new ArrayList<>();
         for (BluetoothDevice device : devices) {
             BluetoothEntity entity = new BluetoothEntity();
