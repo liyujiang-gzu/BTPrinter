@@ -35,12 +35,18 @@ Bluetooth.openBluetoothSettings();
 ```
 获取已配对蓝牙设备:
 ```javascript
-Bluetooth.getPairedDevice('getPairedDeviceCallback');
-function getPairedDeviceCallback(devices) {
-    Bluetooth.showAlert(JSON.stringify(devices));
-}
+var json = Bluetooth.getPairedDevice();
+Bluetooth.showAlert(json);
+```
+```text
+[{"address":"DC:0D:30:60:A1:F3","name":"Printer001"},{"address":"54:DC:1D:57:7D:57","name":"cool1 dual"},{"address":"E4:F8:9C:66:5A:B6","name":"LIYUJIANG"}]
+```
+连接蓝牙打印机:
+```javascript
+Bluetooth.connectPrinter('DC:0D:30:60:A1:F3');
 ```
 打印测试:
 ```javascript
-Bluetooth.printPaper('E4:F8:9C:66:5A:B6');
+var json = '{}';
+Bluetooth.printPaper(json);
 ```

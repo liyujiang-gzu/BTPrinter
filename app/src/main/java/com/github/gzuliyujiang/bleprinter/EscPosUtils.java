@@ -144,7 +144,7 @@ public class EscPosUtils {
     /**
      * 切纸
      */
-    public static final byte[] CUT_PAPER = {0x1d, 0x56, 0x30};
+    public static final byte[] CUT_PAPER = {0x1d, 0x56, 0x0};
 
     /**
      * 打印并换行
