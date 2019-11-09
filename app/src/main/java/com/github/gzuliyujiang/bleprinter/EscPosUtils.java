@@ -1,7 +1,6 @@
 package com.github.gzuliyujiang.bleprinter;
 
 import android.annotation.SuppressLint;
-import android.text.TextUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -21,19 +20,14 @@ public class EscPosUtils {
      */
     private static final int LINE_BYTE_SIZE = 48;
 
-    private static final int LEFT_LENGTH = 26;
+    private static final int LEFT_LENGTH = 24;
 
-    private static final int RIGHT_LENGTH = 22;
+    private static final int RIGHT_LENGTH = 24;
 
     /**
      * 左侧汉字最多显示几个文字
      */
-    private static final int LEFT_TEXT_MAX_LENGTH = 12;
-
-    /**
-     * 小票打印菜品的名称最多显示几个文字
-     */
-    public static final int MEAL_NAME_MAX_LENGTH = 12;
+    private static final int LEFT_TEXT_MAX_LENGTH = 10;
 
     private static OutputStream outputStream = null;
 
@@ -196,7 +190,6 @@ public class EscPosUtils {
     @SuppressLint("NewApi")
     public static String format3Column(String leftText, String middleText, String rightText) {
         StringBuilder sb = new StringBuilder();
-        // 左边最多显示 LEFT_TEXT_MAX_LENGTH 个汉字 + 两个点
         if (leftText.length() > LEFT_TEXT_MAX_LENGTH) {
             leftText = leftText.substring(0, LEFT_TEXT_MAX_LENGTH) + "..";
         }
@@ -220,8 +213,7 @@ public class EscPosUtils {
             sb.append(" ");
         }
 
-        // 打印的时候发现，最右边的文字总是偏右一个字符，所以需要删除一个空格
-        sb.delete(sb.length() - 1, sb.length()).append(rightText);
+        sb.append(rightText);
         return sb.toString();
     }
 
@@ -234,22 +226,6 @@ public class EscPosUtils {
     @SuppressLint("NewApi")
     private static int calculateBytesLength(String msg) {
         return msg.getBytes(Charset.forName("gbk")).length;
-    }
-
-    /**
-     * 格式化菜品名称，最多显示MEAL_NAME_MAX_LENGTH个数
-     *
-     * @param name
-     * @return
-     */
-    public static String formatMealName(String name) {
-        if (TextUtils.isEmpty(name)) {
-            return name;
-        }
-        if (name.length() > MEAL_NAME_MAX_LENGTH) {
-            return name.substring(0, 8) + "..";
-        }
-        return name;
     }
 
     public static void printTest() {
@@ -266,10 +242,10 @@ public class EscPosUtils {
         printText(format2Column("上菜时间", "2016-02-16 11:46\n"));
         printText(format2Column("人数：2人", "收银员：张三\n"));
 
-        printText("--------------------------------\n");
+        printText(formatDividerLine());
         selectCommand(BOLD);
         printText(format3Column("项目", "数量", "金额\n"));
-        printText("--------------------------------\n");
+        printText(formatDividerLine());
         selectCommand(BOLD_CANCEL);
         printText(format3Column("面", "1", "0.00\n"));
         printText(format3Column("米饭", "1", "6.00\n"));
@@ -278,12 +254,12 @@ public class EscPosUtils {
         printText(format3Column("牛肉面啊啊", "1", "2226.00\n"));
         printText(format3Column("牛肉面啊啊啊牛肉面啊啊啊", "888", "98886.00\n"));
 
-        printText("--------------------------------\n");
+        printText(formatDividerLine());
         printText(format2Column("合计", "53.50\n"));
         printText(format2Column("抹零", "3.50\n"));
-        printText("--------------------------------\n");
+        printText(formatDividerLine());
         printText(format2Column("应收", "50.00\n"));
-        printText("--------------------------------\n");
+        printText(formatDividerLine());
 
         selectCommand(ALIGN_LEFT);
         printText("备注：不要辣、不要香菜");

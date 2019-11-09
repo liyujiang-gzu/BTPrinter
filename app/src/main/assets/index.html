@@ -16,23 +16,35 @@
 </head>
 <body>
 <div style="padding-top:25px;">
-    <button onclick="checkBluetoothEnable()">检查蓝牙是否开启:Bluetooth.isBluetoothEnabled()</button>
-    <br/>
-    <button onclick="enableBluetooth()">开启蓝牙:Bluetooth.enableBluetooth()</button>
-    <br/>
-    <button onclick="disableBluetooth()">关闭蓝牙:Bluetooth.disableBluetooth()</button>
-    <br/>
-    <button onclick="bluetoothSettings()">打开蓝牙设置(配对):Bluetooth.openBluetoothSettings()</button>
-    <br/>
-    <button onclick="getPairedDevice()">获取已配对蓝牙设备:Bluetooth.getPairedDevice('callback');</button>
-    <br/>
-    <button onclick="connectPrinter()">
-        连接蓝牙打印机:Bluetooth.connectPrinter(address,'callbackSuccess','callbackFailure');
+    <button onclick="checkBluetoothEnable()">
+        检查蓝牙是否开启:Bluetooth.isBluetoothEnabled();
     </button>
     <br/>
-    <button onclick="disconnectPrinter()">断开已连接的打印机:Bluetooth.disconnectPrinter();</button>
+    <button onclick="Bluetooth.enableBluetooth()">
+        开启蓝牙:Bluetooth.enableBluetooth();
+    </button>
     <br/>
-    <button onclick="printPaper()">打印测试:Bluetooth.printPaper(json)</button>
+    <button onclick="Bluetooth.disableBluetooth()">
+        关闭蓝牙:Bluetooth.disableBluetooth();
+    </button>
+    <br/>
+    <button onclick="Bluetooth.openBluetoothSettings()">
+        打开蓝牙设置(配对):Bluetooth.openBluetoothSettings();
+    </button>
+    <br/>
+    <button onclick="Bluetooth.showAlert(Bluetooth.getPairedDevice())">
+        获取已配对蓝牙设备:json=Bluetooth.getPairedDevice();
+    </button>
+    <br/>
+    <button onclick="Bluetooth.connectPrinter('DC:0D:30:60:A1:F3')">
+        连接蓝牙打印机:Bluetooth.connectPrinter('DC:0D:30:60:A1:F3');
+    </button>
+    <br/>
+    <button onclick="Bluetooth.printPaper('{}')">打印测试:Bluetooth.printPaper(json)</button>
+    <br/>
+    <button onclick="Bluetooth.disconnectPrinter()">
+        断开打印机连接:Bluetooth.disconnectPrinter();
+    </button>
     <br/>
 </div>
 </body>
@@ -43,46 +55,6 @@
             } else {
                 Bluetooth.showToast('蓝牙未打开');
             }
-        }
-
-        function enableBluetooth(){
-            Bluetooth.enableBluetooth();
-        }
-
-        function disableBluetooth(){
-            Bluetooth.disableBluetooth();
-        }
-
-        function bluetoothSettings(){
-            Bluetooth.openBluetoothSettings();
-        }
-
-        function getPairedDevice(){
-            Bluetooth.getPairedDevice('getPairedDeviceCallback');
-        }
-
-        function getPairedDeviceCallback(responseData) {
-            Bluetooth.showAlert(JSON.stringify(responseData));
-        }
-
-        function connectPrinter(){
-            Bluetooth.connectPrinter('DC:0D:30:60:A1:F3', 'connectSuccessCallback', 'connectFailureCallback');
-        }
-
-        function connectSuccessCallback() {
-            Bluetooth.showToast('连接成功');
-        }
-
-        function connectFailureCallback() {
-             Bluetooth.showToast('连接失败');
-        }
-
-        function disconnectPrinter(){
-            Bluetooth.disconnectPrinter();
-        }
-
-        function printPaper(){
-            Bluetooth.printPaper('');
         }
 </script>
 </html>

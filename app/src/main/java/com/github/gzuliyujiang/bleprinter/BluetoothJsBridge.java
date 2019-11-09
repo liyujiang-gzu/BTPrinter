@@ -9,7 +9,6 @@ import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.LifecycleEventObserver;
 import androidx.lifecycle.LifecycleOwner;
 
-import com.github.gzuliyujiang.scaffold.browser.BrowserKit;
 import com.github.gzuliyujiang.scaffold.dialog.AlertDialog;
 import com.github.gzuliyujiang.scaffold.dialog.ProgressDialog;
 import com.google.gson.Gson;
@@ -127,7 +126,7 @@ public class BluetoothJsBridge {
     }
 
     @JavascriptInterface
-    public void getPairedDevice(final String callbackName) {
+    public String getPairedDevice() {
         List<BluetoothDevice> devices = BluetoothUtils.getPairedDevice();
         List<BluetoothEntity> entities = new ArrayList<>();
         for (BluetoothDevice device : devices) {
@@ -140,38 +139,29 @@ public class BluetoothJsBridge {
             entity.setAddress(device.getAddress());
             entities.add(entity);
         }
-        final String json = new Gson().toJson(entities);
-        activity.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                BrowserKit.evaluateJavascript(activity.getWebView(), callbackName + "(" + json + ")");
-            }
-        });
+        return new Gson().toJson(entities);
     }
 
     @JavascriptInterface
-    public void connectPrinter(final String address, final String callbackSuccess, final String callbackFailure) {
+    public void connectPrinter(final String address) {
+        if (!BluetoothUtils.isBluetoothEnabled()) {
+            showToast("蓝牙未打开");
+            return;
+        }
+        showProgress("请稍候");
         activity.getPrinterBinder().ConnectBtPort(address, new TaskCallback() {
             @Override
             public void OnSucceed() {
                 btConnected = true;
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        BrowserKit.evaluateJavascript(activity.getWebView(), callbackSuccess + "()");
-                    }
-                });
+                closeProgress();
+                showToast("连接打印机成功");
             }
 
             @Override
             public void OnFailed() {
                 btConnected = false;
-                activity.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        BrowserKit.evaluateJavascript(activity.getWebView(), callbackFailure + "()");
-                    }
-                });
+                closeProgress();
+                showToast("连接打印机失败");
             }
         });
     }
@@ -186,12 +176,12 @@ public class BluetoothJsBridge {
             @Override
             public void OnSucceed() {
                 btConnected = false;
-                showToast("打印机连接断开成功");
+                showToast("打印机连接已断开");
             }
 
             @Override
             public void OnFailed() {
-                showToast("打印机连接断开失败");
+                showToast("打印机断连失败");
             }
         });
     }
@@ -217,25 +207,25 @@ public class BluetoothJsBridge {
             public List<byte[]> processDataBeforeSend() {
                 List<byte[]> list = new ArrayList<>();
 
-                list.add(EscPosUtils.CUT_PAPER);
                 list.add(EscPosUtils.RESET);
+                list.add(EscPosUtils.CUT_PAPER);
+
                 list.add(EscPosUtils.LINE_SPACING_DEFAULT);
                 list.add(EscPosUtils.ALIGN_CENTER);
                 list.add(EscPosUtils.DOUBLE_HEIGHT_WIDTH);
                 list.add(StringUtils.strTobytes("发货单\n\n"));
+
                 list.add(EscPosUtils.NORMAL);
                 list.add(EscPosUtils.ALIGN_LEFT);
                 list.add(StringUtils.strTobytes(EscPosUtils.formatDividerLine()));
                 list.add(EscPosUtils.BOLD);
-                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("商品名称", "数量", "金额\n")));
+                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("商品名称", "数量/单价", "金额\n")));
                 list.add(EscPosUtils.BOLD_CANCEL);
                 list.add(StringUtils.strTobytes(EscPosUtils.formatDividerLine()));
-                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("地方33地方", "71", "0.00\n")));
-                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("f的", "1", "6.00\n")));
-                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("人热熔头", "45", "26.00\n")));
-                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("一个测试", "15", "226.00\n")));
-                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("让他突然", "18", "2226.00\n")));
-                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("牛肉面啊啊啊牛肉面啊啊啊", "888", "98886.00\n")));
+                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("地方33地方", "4/1.00", "4.00\n")));
+                list.add(StringUtils.strTobytes(EscPosUtils.format3Column("sf面啊啊啊牛肉面啊啊啊", "888/10", "8880.00\n")));
+                list.add(StringUtils.strTobytes(EscPosUtils.format2Column("合计", "8884.00\n")));
+
                 list.add(StringUtils.strTobytes(EscPosUtils.formatDividerLine()));
                 list.add(EscPosUtils.BOLD);
                 list.add(EscPosUtils.ALIGN_CENTER);
@@ -246,6 +236,7 @@ public class BluetoothJsBridge {
                 list.add(StringUtils.strTobytes(EscPosUtils.format2Column("姓名", "穿青人\n")));
                 list.add(StringUtils.strTobytes(EscPosUtils.format2Column("收货地址", "贵州省贵阳市花溪区xx都是x非得让他\n")));
                 list.add(StringUtils.strTobytes(EscPosUtils.format2Column("联系方式", "5449856555556\n")));
+
                 list.add(StringUtils.strTobytes(EscPosUtils.formatDividerLine()));
                 list.add(EscPosUtils.BOLD);
                 list.add(EscPosUtils.ALIGN_CENTER);
@@ -257,19 +248,18 @@ public class BluetoothJsBridge {
                 list.add(StringUtils.strTobytes(EscPosUtils.format2Column("收货地址", "浙江省杭州市滨江区中威大厦11楼\n")));
                 list.add(StringUtils.strTobytes(EscPosUtils.format2Column("联系方式", "5449856555556\n")));
                 list.add(StringUtils.strTobytes(EscPosUtils.formatDividerLine()));
+
+                list.add(EscPosUtils.ALIGN_CENTER);
                 list.add(DataForSendToPrinterPos80.setBarcodeWidth(2));
                 list.add(DataForSendToPrinterPos80.setBarcodeHeight(80));
                 list.add(DataForSendToPrinterPos80.printBarcode(73, 10, "{B12345678"));
+
+                list.add(EscPosUtils.ALIGN_LEFT);
                 list.add(StringUtils.strTobytes("\n\n\n\n\n"));
 
                 return list;
             }
         });
-    }
-
-    @JavascriptInterface
-    public void connectAndPrintPaper(final String address) {
-        new PrintPaperTask(activity).execute(address);
     }
 
 }

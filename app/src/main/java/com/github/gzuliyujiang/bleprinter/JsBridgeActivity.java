@@ -121,6 +121,15 @@ public class JsBridgeActivity extends AbsExitActivity {
         FloatingView.get().detach(this).remove();
     }
 
+    @Override
+    public void onBackPressed() {
+        if (webView.canGoBack()) {
+            webView.goBack();
+        } else {
+            super.onBackPressed();
+        }
+    }
+
     private void bindPrinterService() {
         try {
             serviceIntent = new Intent(this, PosprinterService.class);
@@ -233,7 +242,11 @@ public class JsBridgeActivity extends AbsExitActivity {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 Logger.debug("shouldOverrideUrlLoading: url=" + url);
-                return super.shouldOverrideUrlLoading(view, url);
+                if (url.startsWith("file") || url.startsWith("http")) {
+                    webView.loadUrl(url);
+                    return true;
+                }
+                return true;
             }
 
             @Override

@@ -19,6 +19,7 @@ import java.util.UUID;
  *
  * @author 大定府羡民
  */
+@Deprecated
 public class PrintPaperTask extends AsyncTask<String, Integer, Void> {
     private WeakReference<Activity> activityWeakReference;
     private ProgressDialog progressDialog;
