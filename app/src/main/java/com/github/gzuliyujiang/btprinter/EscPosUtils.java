@@ -1,4 +1,4 @@
-package com.github.gzuliyujiang.bleprinter;
+package com.github.gzuliyujiang.btprinter;
 
 import android.annotation.SuppressLint;
 

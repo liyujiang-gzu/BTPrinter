@@ -1,4 +1,4 @@
-package com.github.gzuliyujiang.bleprinter;
+package com.github.gzuliyujiang.btprinter;
 
 import android.bluetooth.BluetoothDevice;
 import android.webkit.JavascriptInterface;

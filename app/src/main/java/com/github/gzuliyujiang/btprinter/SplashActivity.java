@@ -1,4 +1,4 @@
-package com.github.gzuliyujiang.bleprinter;
+package com.github.gzuliyujiang.btprinter;
 
 import com.github.gzuliyujiang.scaffold.activity.AbsSplashActivity;
 
