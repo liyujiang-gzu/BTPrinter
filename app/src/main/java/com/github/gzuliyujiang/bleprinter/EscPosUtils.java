@@ -5,8 +5,6 @@ import android.text.TextUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 
 /**
@@ -19,23 +17,23 @@ import java.nio.charset.Charset;
 public class EscPosUtils {
 
     /**
-     * 打印纸一行最大的字节
+     * 打印纸一行最大的字节(GBK编码，1个字母占1个字节，1个汉字占2个字节)
      */
-    private static final int LINE_BYTE_SIZE = 32;
+    private static final int LINE_BYTE_SIZE = 48;
 
-    private static final int LEFT_LENGTH = 20;
+    private static final int LEFT_LENGTH = 26;
 
-    private static final int RIGHT_LENGTH = 12;
+    private static final int RIGHT_LENGTH = 22;
 
     /**
      * 左侧汉字最多显示几个文字
      */
-    private static final int LEFT_TEXT_MAX_LENGTH = 8;
+    private static final int LEFT_TEXT_MAX_LENGTH = 12;
 
     /**
-     * 小票打印菜品的名称，上限调到8个字
+     * 小票打印菜品的名称最多显示几个文字
      */
-    public static final int MEAL_NAME_MAX_LENGTH = 8;
+    public static final int MEAL_NAME_MAX_LENGTH = 12;
 
     private static OutputStream outputStream = null;
 
@@ -149,34 +147,28 @@ public class EscPosUtils {
      */
     public static final byte[] LINE_SPACING_DEFAULT = {0x1b, 0x32};
 
-
-//    final byte[][] byteCommands = {
-//            {0x1b, 0x61, 0x00}, // 左对齐
-//            {0x1b, 0x61, 0x01}, // 中间对齐
-//            {0x1b, 0x61, 0x02}, // 右对齐
-//            {0x1b, 0x40},// 复位打印机
-//            {0x1b, 0x4d, 0x00},// 标准ASCII字体
-//            {0x1b, 0x4d, 0x01},// 压缩ASCII字体
-//            {0x1d, 0x21, 0x00},// 字体不放大
-//            {0x1d, 0x21, 0x11},// 宽高加倍
-//            {0x1b, 0x45, 0x00},// 取消加粗模式
-//            {0x1b, 0x45, 0x01},// 选择加粗模式
-//            {0x1b, 0x7b, 0x00},// 取消倒置打印
-//            {0x1b, 0x7b, 0x01},// 选择倒置打印
-//            {0x1d, 0x42, 0x00},// 取消黑白反显
-//            {0x1d, 0x42, 0x01},// 选择黑白反显
-//            {0x1b, 0x56, 0x00},// 取消顺时针旋转90°
-//            {0x1b, 0x56, 0x01},// 选择顺时针旋转90°
-//    };
+    /**
+     * 切纸
+     */
+    public static final byte[] CUT_PAPER = {0x1d, 0x56, 0x30};
 
     /**
-     * 打印两列
-     *
-     * @param leftText  左侧文字
-     * @param rightText 右侧文字
-     * @return
+     * 打印并换行
      */
-    @SuppressLint("NewApi")
+    public static final byte[] PRINT_AND_FEED_LINE = {0x0a};
+
+    /**
+     * 打印分隔线
+     */
+    public static String formatDividerLine() {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < LINE_BYTE_SIZE; i++) {
+            sb.append("-");
+        }
+        sb.append("\n");
+        return sb.toString();
+    }
+
     public static String format2Column(String leftText, String rightText) {
         StringBuilder sb = new StringBuilder();
         int leftTextLength = calculateBytesLength(leftText);
@@ -241,15 +233,7 @@ public class EscPosUtils {
      */
     @SuppressLint("NewApi")
     private static int calculateBytesLength(String msg) {
-        return msg.getBytes(Charset.forName("GBK")).length;
-    }
-
-    public static char[] toChars(byte[] bytes) {
-        Charset charset = Charset.forName("GBK");
-        ByteBuffer bb = ByteBuffer.allocate(bytes.length);
-        bb.put(bytes).flip();
-        CharBuffer cb = charset.decode(bb);
-        return cb.array();
+        return msg.getBytes(Charset.forName("gbk")).length;
     }
 
     /**

@@ -1,12 +1,16 @@
 package com.github.gzuliyujiang.bleprinter;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
+import android.os.IBinder;
+import android.text.TextUtils;
 import android.view.View;
 import android.webkit.ConsoleMessage;
 import android.webkit.JsPromptResult;
@@ -20,23 +24,31 @@ import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 
 import com.blankj.utilcode.util.ProcessUtils;
+import com.blankj.utilcode.util.ToastUtils;
 import com.github.gzuliyujiang.logger.Logger;
-import com.github.gzuliyujiang.scaffold.activity.AbsActivity;
+import com.github.gzuliyujiang.scaffold.activity.AbsExitActivity;
 import com.github.gzuliyujiang.scaffold.dialog.AlertDialog;
+import com.imuxuan.floatingview.FloatingMagnetView;
+import com.imuxuan.floatingview.FloatingView;
+import com.imuxuan.floatingview.MagnetViewListener;
+
+import net.posprinter.posprinterface.IMyBinder;
+import net.posprinter.service.PosprinterService;
 
 /**
  * Created by liyujiang on 2019/10/27 01:22
  *
  * @author 大定府羡民
  */
-public class JsBridgeActivity extends AbsActivity {
+public class JsBridgeActivity extends AbsExitActivity {
     private String url;
-
     private WebView webView;
+    private IMyBinder printerBinder;
+    private Intent serviceIntent;
 
-    public static void start(Context context, String url) {
+    public static void start(Context context) {
         Intent starter = new Intent(context, JsBridgeActivity.class);
-        starter.putExtra("url", url);
+        starter.putExtra("url", AppStorage.getUrl());
         context.startActivity(starter);
     }
 
@@ -54,105 +66,86 @@ public class JsBridgeActivity extends AbsActivity {
         return webView;
     }
 
+    public final IMyBinder getPrinterBinder() {
+        return printerBinder;
+    }
+
     @Override
     public void onViewCreated(@NonNull View contentView) {
+        bindPrinterService();
+        initWebView();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        FloatingView.get().attach(this).add().icon(R.mipmap.ic_developer_mode).listener(new MagnetViewListener() {
+            @Override
+            public void onRemove(FloatingMagnetView magnetView) {
+            }
+
+            @Override
+            public void onClick(FloatingMagnetView magnetView) {
+                showSettingsDialog();
+            }
+        });
+    }
+
+    private void showSettingsDialog() {
+        AlertDialog.showInput(activity, "设置地址", AppStorage.getUrl(), new AlertDialog.OnInputListener() {
+            @Override
+            public void onInput(String text) {
+                if (TextUtils.isEmpty(text)) {
+                    return;
+                }
+                if (!(text.startsWith("file") || text.startsWith("http"))) {
+                    ToastUtils.showShort("地址无效");
+                    return;
+                }
+                url = text;
+                AppStorage.saveUrl(text);
+                webView.loadUrl(url);
+            }
+
+            @Override
+            public void onCancel() {
+
+            }
+        });
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        stopService(serviceIntent);
+        FloatingView.get().detach(this).remove();
+    }
+
+    private void bindPrinterService() {
+        try {
+            serviceIntent = new Intent(this, PosprinterService.class);
+            bindService(serviceIntent, new ServiceConnection() {
+                @Override
+                public void onServiceConnected(ComponentName name, IBinder service) {
+                    printerBinder = (IMyBinder) service;
+                    Logger.debug("printer service connected");
+                }
+
+                @Override
+                public void onServiceDisconnected(ComponentName name) {
+                    Logger.debug("printer service disconnected");
+                }
+            }, BIND_AUTO_CREATE);
+        } catch (Exception e) {
+            Logger.debug(e);
+        }
+    }
+
+    private void initWebView() {
         webView = findViewById(R.id.webView);
         customSettings(webView);
-        webView.setWebViewClient(new WebViewClient() {
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, String url) {
-                Logger.debug("shouldOverrideUrlLoading: url=" + url);
-                return super.shouldOverrideUrlLoading(view, url);
-            }
-
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    return this.shouldOverrideUrlLoading(view, request.getUrl().toString());
-                }
-                return super.shouldOverrideUrlLoading(view, request);
-            }
-
-            @Override
-            public void onPageStarted(WebView view, String url, Bitmap favicon) {
-                Logger.debug("onPageStarted: url=" + url);
-                super.onPageStarted(view, url, favicon);
-            }
-
-            @Override
-            public void onPageFinished(WebView view, String url) {
-                Logger.debug("onPageFinished: url=" + url);
-                super.onPageFinished(view, url);
-            }
-
-            @Override
-            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
-                Logger.debug("onReceivedError: url=" + url);
-                super.onReceivedError(view, errorCode, description, failingUrl);
-            }
-        });
-        webView.setWebChromeClient(new WebChromeClient() {
-            @Override
-            public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
-                Logger.debug("onJsAlert: url=" + url);
-                AlertDialog.show(activity, message)
-                        .setButton("确定", new AlertDialog.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                result.cancel();
-                            }
-                        });
-                return true;
-            }
-
-            @Override
-            public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
-                Logger.debug("onJsConfirm: url=" + url);
-                AlertDialog.show(activity, message)
-                        .asConfirm()
-                        .setLeftButton("确定", new AlertDialog.OnClickListener() {
-                            @Override
-                            public void onClick(View view) {
-                                result.confirm();
-                            }
-                        }).setRightButton("取消", new AlertDialog.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        result.cancel();
-                    }
-                });
-                return true;
-            }
-
-            @Override
-            public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, final JsPromptResult result) {
-                Logger.debug("onJsPrompt: url=" + url);
-                AlertDialog.showInput(activity, message, defaultValue, new AlertDialog.OnInputListener() {
-                    @Override
-                    public void onInput(String text) {
-                        result.confirm(text);
-                    }
-
-                    @Override
-                    public void onCancel() {
-                        result.cancel();
-                    }
-                });
-                return true;
-            }
-
-            @Override
-            public void onConsoleMessage(String message, int lineNumber, String sourceID) {
-                Logger.debug("onConsoleMessage: message=" + message + ", " + sourceID + "[" + lineNumber + "]");
-                super.onConsoleMessage(message, lineNumber, sourceID);
-            }
-
-            @Override
-            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
-                this.onConsoleMessage(consoleMessage.message(), consoleMessage.lineNumber(), consoleMessage.sourceId());
-                return true;
-            }
-        });
+        customWebViewClient();
+        customChromeClient();
         webView.addJavascriptInterface(new BluetoothJsBridge(this), "Bluetooth");
         webView.loadUrl(url);
     }
@@ -226,13 +219,114 @@ public class JsBridgeActivity extends AbsActivity {
         }
     }
 
-    private static boolean isNetworkConnected(Context context) {
+    private boolean isNetworkConnected(Context context) {
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (cm == null) {
             return false;
         }
         NetworkInfo ni = cm.getActiveNetworkInfo();
         return ni != null && ni.isConnected();
+    }
+
+    private void customWebViewClient() {
+        webView.setWebViewClient(new WebViewClient() {
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, String url) {
+                Logger.debug("shouldOverrideUrlLoading: url=" + url);
+                return super.shouldOverrideUrlLoading(view, url);
+            }
+
+            @Override
+            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    return this.shouldOverrideUrlLoading(view, request.getUrl().toString());
+                }
+                return super.shouldOverrideUrlLoading(view, request);
+            }
+
+            @Override
+            public void onPageStarted(WebView view, String url, Bitmap favicon) {
+                Logger.debug("onPageStarted: url=" + url);
+                super.onPageStarted(view, url, favicon);
+            }
+
+            @Override
+            public void onPageFinished(WebView view, String url) {
+                Logger.debug("onPageFinished: url=" + url);
+                super.onPageFinished(view, url);
+            }
+
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                Logger.debug("onReceivedError: url=" + url);
+                super.onReceivedError(view, errorCode, description, failingUrl);
+            }
+        });
+    }
+
+    private void customChromeClient() {
+        webView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public boolean onJsAlert(WebView view, String url, String message, final JsResult result) {
+                Logger.debug("onJsAlert: url=" + url);
+                AlertDialog.show(activity, message)
+                        .setButton("确定", new AlertDialog.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                result.cancel();
+                            }
+                        });
+                return true;
+            }
+
+            @Override
+            public boolean onJsConfirm(WebView view, String url, String message, final JsResult result) {
+                Logger.debug("onJsConfirm: url=" + url);
+                AlertDialog.show(activity, message)
+                        .asConfirm()
+                        .setLeftButton("确定", new AlertDialog.OnClickListener() {
+                            @Override
+                            public void onClick(View view) {
+                                result.confirm();
+                            }
+                        }).setRightButton("取消", new AlertDialog.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        result.cancel();
+                    }
+                });
+                return true;
+            }
+
+            @Override
+            public boolean onJsPrompt(WebView view, String url, String message, String defaultValue, final JsPromptResult result) {
+                Logger.debug("onJsPrompt: url=" + url);
+                AlertDialog.showInput(activity, message, defaultValue, new AlertDialog.OnInputListener() {
+                    @Override
+                    public void onInput(String text) {
+                        result.confirm(text);
+                    }
+
+                    @Override
+                    public void onCancel() {
+                        result.cancel();
+                    }
+                });
+                return true;
+            }
+
+            @Override
+            public void onConsoleMessage(String message, int lineNumber, String sourceID) {
+                Logger.debug("onConsoleMessage: message=" + message + ", " + sourceID + "[" + lineNumber + "]");
+                super.onConsoleMessage(message, lineNumber, sourceID);
+            }
+
+            @Override
+            public boolean onConsoleMessage(ConsoleMessage consoleMessage) {
+                this.onConsoleMessage(consoleMessage.message(), consoleMessage.lineNumber(), consoleMessage.sourceId());
+                return true;
+            }
+        });
     }
 
 }

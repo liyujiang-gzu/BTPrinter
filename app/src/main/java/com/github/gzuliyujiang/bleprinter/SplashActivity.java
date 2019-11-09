@@ -13,7 +13,7 @@ public class SplashActivity extends AbsSplashActivity {
 
     @Override
     protected boolean goToNextActivity(List<String> deniedPermissions) {
-        MainActivity.start(activity);
+        JsBridgeActivity.start(this);
         return true;
     }
 
